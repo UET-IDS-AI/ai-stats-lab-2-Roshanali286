@@ -1,196 +1,64 @@
-
-import math
+import AI_stats_lab as amt
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-# ============================================================
-# Part 1 — Probability Foundations
-# ============================================================
+# =========================
+# Probability Tests
+# =========================
 
-def probability_union(PA, PB, PAB):
-    """
-    P(A ∪ B) = P(A) + P(B) - P(A ∩ B)
-    """
-    return PA + PB - PAB
+def test_probability_union():
+    assert abs(amt.probability_union(0.5, 0.4, 0.2) - 0.7) < 1e-6
 
 
-def conditional_probability(PAB, PB):
-    """
-    P(A|B) = P(A ∩ B) / P(B)
-    """
-    if PB == 0:
-        return 0
-    return PAB / PB
+def test_conditional_probability():
+    assert abs(amt.conditional_probability(0.2, 0.4) - 0.5) < 1e-6
 
 
-def are_independent(PA, PB, PAB, tol=1e-9):
-    """
-    True if:
-        |P(A ∩ B) - P(A)P(B)| < tol
-    """
-    return abs(PAB - (PA * PB)) < tol
+def test_are_independent():
+    assert amt.are_independent(0.5, 0.4, 0.2)
 
 
-def bayes_rule(PBA, PA, PB):
-    """
-    P(A|B) = P(B|A)P(A) / P(B)
-    """
-    if PB == 0:
-        return 0
-    return (PBA * PA) / PB
+def test_bayes_rule():
+    assert abs(amt.bayes_rule(0.9, 0.01, 0.05) - 0.18) < 1e-6
 
 
-# ============================================================
-# Part 2 — Bernoulli Distribution
-# ============================================================
+# =========================
+# Bernoulli Tests
+# =========================
 
-def bernoulli_pmf(x, theta):
-    """
-    f(x, theta) = theta^x (1-theta)^(1-x)
-    """
-    return (theta ** x) * ((1 - theta) ** (1 - x))
+def test_bernoulli_pmf():
+    assert abs(amt.bernoulli_pmf(1, 0.7) - 0.7) < 1e-6
+    assert abs(amt.bernoulli_pmf(0, 0.7) - 0.3) < 1e-6
 
 
-def bernoulli_theta_analysis(theta_values):
-    """
-    Returns:
-        (theta, P0, P1, is_symmetric)
-    """
-    results = []
-
-    for theta in theta_values:
-        P1 = bernoulli_pmf(1, theta)
-        P0 = bernoulli_pmf(0, theta)
-        is_symmetric = abs(P0 - P1) < 1e-9
-        results.append((theta, P0, P1, is_symmetric))
-
-    return results
+def test_bernoulli_symmetry():
+    result = amt.bernoulli_theta_analysis([0.5])
+    assert result[0][3] is True
 
 
-# ============================================================
-# Part 3 — Normal Distribution
-# ============================================================
+# =========================
+# Uniform Distribution Tests
+# =========================
 
-def normal_pdf(x, mu, sigma):
-    """
-    Normal PDF:
-        1/(sqrt(2π)σ) * exp(-(x-μ)^2 / (2σ^2))
-    """
-    coefficient = 1 / (math.sqrt(2 * math.pi) * sigma)
-    exponent = -((x - mu) ** 2) / (2 * sigma ** 2)
-    return coefficient * math.exp(exponent)
+def test_uniform_statistics():
+    result = amt.uniform_histogram_analysis([0], [1])
+    a, b, sm, tm, me, sv, tv, ve = result[0]
 
-
-def normal_histogram_analysis(mu_values,
-                              sigma_values,
-                              n_samples=10000,
-                              bins=30):
-    """
-    For each (mu, sigma):
-    Return:
-        (
-            mu,
-            sigma,
-            sample_mean,
-            theoretical_mean,
-            mean_error,
-            sample_variance,
-            theoretical_variance,
-            variance_error
-        )
-    """
-    results = []
-
-    for mu, sigma in zip(mu_values, sigma_values):
-        samples = np.random.normal(mu, sigma, n_samples)
-
-        sample_mean = np.mean(samples)
-        sample_variance = np.var(samples)
-
-        theoretical_mean = mu
-        theoretical_variance = sigma ** 2
-
-        mean_error = abs(sample_mean - theoretical_mean)
-        variance_error = abs(sample_variance - theoretical_variance)
-
-        results.append((
-            mu,
-            sigma,
-            sample_mean,
-            theoretical_mean,
-            mean_error,
-            sample_variance,
-            theoretical_variance,
-            variance_error
-        ))
-
-    return results
+    assert abs(tm - 0.5) < 1e-6
+    assert abs(tv - (1/12)) < 1e-6
+    assert me < 0.05
+    assert ve < 0.05
 
 
-# ============================================================
-# Part 4 — Uniform Distribution
-# ============================================================
+# =========================
+# Normal Distribution Tests
+# =========================
 
-def uniform_mean(a, b):
-    """
-    (a + b) / 2
-    """
-    return (a + b) / 2
+def test_normal_statistics():
+    result = amt.normal_histogram_analysis([0], [1])
+    mu, sigma, sm, tm, me, sv, tv, ve = result[0]
 
-
-def uniform_variance(a, b):
-    """
-    (b - a)^2 / 12
-    """
-    return ((b - a) ** 2) / 12
-
-
-def uniform_histogram_analysis(a_values,
-                               b_values,
-                               n_samples=10000,
-                               bins=30):
-    """
-    For each (a, b):
-    Return:
-        (
-            a,
-            b,
-            sample_mean,
-            theoretical_mean,
-            mean_error,
-            sample_variance,
-            theoretical_variance,
-            variance_error
-        )
-    """
-    results = []
-
-    for a, b in zip(a_values, b_values):
-        samples = np.random.uniform(a, b, n_samples)
-
-        sample_mean = np.mean(samples)
-        sample_variance = np.var(samples)
-
-        theoretical_mean = uniform_mean(a, b)
-        theoretical_variance = uniform_variance(a, b)
-
-        mean_error = abs(sample_mean - theoretical_mean)
-        variance_error = abs(sample_variance - theoretical_variance)
-
-        results.append((
-            a,
-            b,
-            sample_mean,
-            theoretical_mean,
-            mean_error,
-            sample_variance,
-            theoretical_variance,
-            variance_error
-        ))
-
-    return results
-
-
-if __name__ == "__main__":
-    print("Implement all required functions.")
+    assert abs(tm - 0) < 1e-6
+    assert abs(tv - 1) < 1e-6
+    assert me < 0.05
+    assert ve < 0.1
