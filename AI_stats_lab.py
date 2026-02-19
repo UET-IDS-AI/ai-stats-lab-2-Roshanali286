@@ -100,6 +100,7 @@ def normal_histogram_analysis(mu_values,
             variance_error
         )
     """
+    np.random.seed(42)  # <-- FIXED SEED FOR REPRODUCIBILITY
     results = []
 
     for mu, sigma in zip(mu_values, sigma_values):
@@ -164,6 +165,7 @@ def uniform_histogram_analysis(a_values,
             variance_error
         )
     """
+    np.random.seed(42)  # <-- FIXED SEED FOR REPRODUCIBILITY
     results = []
 
     for a, b in zip(a_values, b_values):
